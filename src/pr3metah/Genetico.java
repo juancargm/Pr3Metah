@@ -43,7 +43,6 @@ class Genetico {
         costes = new int[tamPoblacion];
         boolean modificado[] = new boolean[tamPoblacion];
         Random rand = new Random();
-        int muta;
         local = new LocalSearch();
         int h1[], h2[];
         int anteriorMejor = 9999999;
@@ -56,7 +55,6 @@ class Genetico {
         int z = 0;
         int esperanza = (int) Math.round(0.7 * (tamPoblacion / 2)), restantes;
         while (z < 20000) {
-            muta = (Math.abs(rand.nextInt() % tamPoblacion));
             descendencia = new ArrayList<>();
             costesAux = new int[tamPoblacion];
             ++nGeneracion;
@@ -85,10 +83,12 @@ class Genetico {
                 }
                 cont += 2;
             }
-            //MUTO
-            mutacion(muta, y);
-            modificado[muta] = true;
             for (int i = 0; i < tamPoblacion; i++) {
+                //MUTO
+                if (rand.nextDouble() <= 0.2) {
+                    mutacion(i, y);
+                    modificado[i] = true;
+                }
                 if (modificado[i]) {
                     reparaSol(x, y, matriz, descendencia.get(i));
                     local.eliminaRedundancias(x, y, matriz, descendencia.get(i), cubreOrdenado, 0);
