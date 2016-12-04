@@ -115,7 +115,8 @@ public class Pr3Metah {
         String optimos[] = {"5  ", "429", "60 ", "14 ", "253"};
         int n = 5;
         Genetico gen;
-
+        long time_start, time_end;
+        time_start = System.currentTimeMillis();
         for (int i = 0; i < n; i++) {
             leerFichero(ficheros[i]);
             inicializo();
@@ -123,6 +124,8 @@ public class Pr3Metah {
             gen.AGGHux(x, y, matriz, cubreOrdenado, optimos[i], algoritmo[1]);
             System.out.println();
         }
+        time_end = System.currentTimeMillis();
+        System.out.println("EL PROGRAMA HA TARDADO " + (float) (time_end - time_start) / 1000.0 + " SEGUNDOS");
     }
 
 }

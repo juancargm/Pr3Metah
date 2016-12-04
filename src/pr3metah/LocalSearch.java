@@ -23,35 +23,33 @@ class LocalSearch {
      * @param matriz matriz con los datos del problema
      * @param x Numero de territorios +1
      * @param y Numero de comisarias +1
-     * @param semilla semilla para aleatorizar los vecinos generados
      * @param pair vector de Pair para eliminar la s redundancias
      * @return Devuelve una solución vecina
      */
-    int[] busquedaLocal(int solucion[], int matriz[][], int x, int y, Pair pair[], int semilla) {
+    int busquedaLocal(int solucion[], int costes[], int matriz[][], int x, int y, int z, int num, Pair pair[]) {
         int anterior, costeVecina, costeActual, posicion;
-        int solucionActual[] = solucion; // Inicializacion del Greedy
-        costeActual = objetivo(solucionActual, y, matriz);
-        numIteraciones = 1; //Empieza en uno ya que he llamado ya una vez a la funcion objetivo
+        int solucionActual[] = solucion;
+        costeActual = costes[num];
+        numIteraciones = 0;
         Random aleatorio = new Random();
-        aleatorio.setSeed(semilla);
+        //aleatorio.setSeed(semilla);
         ArrayList<Integer> comisarias;
 
         do {
             comisarias = calculaComisarias(solucionActual, y);
             do {
                 posicion = Math.abs(aleatorio.nextInt() % comisarias.size());
-                costeVecina = generaVecino(solucionActual, matriz, x, y, costeActual, comisarias.get(posicion), pair);
+                costeVecina = generaVecino(solucionActual, matriz, x, y, comisarias.get(posicion), pair);
                 comisarias.remove(posicion);
-            } while ((costeVecina >= costeActual) &&  !comisarias.isEmpty() && numIteraciones < 10000); 
+            } while ((costeVecina >= costeActual) &&  !comisarias.isEmpty() && numIteraciones < 200);
             anterior = costeActual;
             if (costeVecina < costeActual) {
                 solucionActual = solucionVecina.clone();
                 costeActual = costeVecina;
             }
-        } while (costeVecina < anterior && numIteraciones < 10000);
-
-
-        return solucionActual;
+        } while (costeVecina < anterior && numIteraciones < 200);
+        costes[num] = costeActual;
+        return numIteraciones;
     }
 
 
@@ -61,88 +59,94 @@ class LocalSearch {
      * @param matriz matriz con los datos del problema
      * @param x Numero de territorios +1
      * @param y Numero de comisarias +1
-     * @param costeActual el coste actual de la solucion
      * @param pos comisaria que vamos a eliminar
      * @param pair vector de Pair para eliminar la s redundancias
      * @return Devuelve el coste del vecino generado
      */
-    private int generaVecino(int solucionActual[], int matriz[][], int x, int y, int costeActual, int pos, Pair pair[]) {
+    private int generaVecino(int solucionActual[], int matriz[][], int x, int y, int pos, Pair pair[]) {
 
         int costeVecina;
-        solucionVecina = solucionActual.clone();
-        ++numIteraciones; //1 factorizacion, por lo que se incrementa el contador
+        solucionVecina = solucionActual;
+        ++numIteraciones;
         solucionVecina[pos] = 0;
-        costeVecina = costeActual - matriz[0][pos];
-            
-       
 
-        //Se genera un vector con todos los candidatos que cubren alguna zona de las que me quedan por cubrir al eliminar esa ( sin incluirla )
-        int vecino[] = new int[y];
-        int zonas[] = new int[x];
-        int zonasPendientes = 0;
-
-        for (int i = 1; i < y; ++i) {
-            vecino[i] = 0;
-            if (i < x) {
-                zonas[i] = 0;
-            }
-        }
-
-        //Se rellena el vector de zonas, las posiciones que quedan con 0, son las que faltan por cubrir
-        for (int k = 1; k < y; ++k) {
-            for (int j = 1; j < x; ++j) {
-                if (matriz[j][k] == 1 && zonas[j] == 0 && solucionVecina[k] == 1) {
-                    zonas[j] = 1;
-                    ++zonasPendientes;
-                }
-            }
-        }
-        zonasPendientes = x - zonasPendientes - 1;
-        for (int k = 1; (k < y && zonasPendientes > 0); ++k) {
-            for (int j = 1; j < x; j++) {
-                if (k != pos) {
-                    if ((matriz[j][k] == 1) && (zonas[j] == 0)) { //La zona esta sin cubrir
-                        vecino[k] = 1;
-                        zonas[j] = 1;
-                        --zonasPendientes;
-                    }
-                }
-            }
-        }
-
-        for (int i = 1; i < y; ++i) {
-            if (solucionVecina[i] == 0 && vecino[i] == 1) {
-                if (i != pos) {
-                    solucionVecina[i] = 1;
-                    costeVecina += matriz[0][i];
-                }
-            }
-        }
-        costeVecina = eliminaRedundancias(x, y, matriz, solucionVecina, pair, costeVecina);
+        reparaSol(x, y, matriz, solucionVecina);
+        eliminaRedundancias(x, y, solucionVecina, pair, matriz);
+        costeVecina = objetivo(solucionActual, y, matriz);
         return costeVecina;
     }
 
-     /**
-     * Elimina las columnas redundantes de una solucioón
-     * @param y Numero de territorios +1
-     * @param x Numero de comisarias +1
-     * @param matriz Matriz con la informacion del problema
-     * @param cubreOrdenado vector de Pair para eliminar las redundancias
-     * @param costeVecina el coste del vecino
-     * @return el coste factorizado de una solución vecina
+    /**
+     * Repara un cromosoma para que sea solucion
+     *
+     * @param x numero de filas de la matriz (zonas)
+     * @param y numero de columnas de la matriz (comisarias)
+     * @param matriz datos de las comisarías y las zonas que cubren asi como su coste
+     * @param sol vector solucion que se esta reparando
      */
-     int eliminaRedundancias(int x, int y, int matriz[][], int solucion[], Pair cubreOrdenado[], int costeVecina) {
-        int factorizacion = costeVecina;
-        MyQuickSort sorter = new MyQuickSort();
-        sorter.sort(cubreOrdenado);
+    void reparaSol(int x, int y, int matriz[][], int sol[]) {
+        while (true) {
+            int cubiertos[] = new int[x];
+            for (int i = 1; i < x; i++) {
+                cubiertos[i] = 0;
+            }
+            for (int c = 1; c < y; c++) {
+                if (sol[c] == 1) {
+                    for (int f = 1; f < x; f++) {
+                        if (matriz[f][c] == 1) {
+                            cubiertos[f] = 1;
+                        }
+                    }
+                }
+            }
+            int cubre[] = new int[y];
+            for (int i = 0; i < y; i++) {
+                cubre[i] = 0;
+            }
+            for (int f = 1; f < x; f++) {
+                if (cubiertos[f] == 0) {
+                    for (int c = 1; c < y; c++) {
+                        if (matriz[f][c] == 1) {
+                            ++cubre[c];
+                        }
+                    }
+                }
+            }
+            float mayor = (float) cubre[1] / matriz[0][1];
+            int pos = 1;
+            for (int i = 2; i < y; i++) {
+                if (((float) cubre[i] / matriz[0][i]) > mayor) {
+                    mayor = (float) cubre[i] / matriz[0][i];
+                    pos = i;
+                }
+            }
+            if (mayor == 0) {
+                return;
+            }
+            sol[pos] = 1;
+            //coste += matriz[0][pos];
+        }
+    }
+
+    /**
+     * Elimina las redundancias de un cromosoma
+     *
+     * @param x numero de filas de la matriz (zonas)
+     * @param y numero de columnas de la matriz (comisarias)
+     * @param solucion el cromosoma al que le eliminamos las redundancias
+     * @param cubreOrdenado vector con el numero de zonas que cubre cada
+     * comisaria
+     * @param matriz datos de las comisarías y las zonas que cubren asi como su coste
+     */
+    void eliminaRedundancias(int x, int y, int solucion[], Pair cubreOrdenado[], int matriz[][]) {
         int quito;
         int i;
         boolean columnaRedundante, sustituible;
-        for (int z = 0; z < y - 1; ++z) {
+        for (int z = 0; z < y - 1; z++) {
             if (solucion[cubreOrdenado[z].getLugar()] == 1) {
                 columnaRedundante = true;
                 quito = cubreOrdenado[z].getLugar();
-                for (i = 1; i < x; ++i) {
+                for (i = 1; i < x; i++) {
                     if (matriz[i][quito] == 1) {
                         sustituible = false;
                         for (int j = 1; j < y; j++) {
@@ -157,11 +161,9 @@ class LocalSearch {
                 }
                 if (columnaRedundante) {
                     solucion[quito] = 0;
-                    factorizacion = factorizacion - matriz[0][quito];
                 }
             }
         }
-        return factorizacion;
     }
 
     /**
@@ -186,7 +188,7 @@ class LocalSearch {
      * @param matriz matriz con los datos del problema
      * @return Devuelve el coste de una solucion
      */
-    private static int objetivo(int solucionVecina[], int tam, int matriz[][]) {
+    private int objetivo(int solucionVecina[], int tam, int matriz[][]) {
         int suma = 0;
         for (int i = 1; i < tam; ++i) {
             suma += solucionVecina[i] * matriz[0][i];

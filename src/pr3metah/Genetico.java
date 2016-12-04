@@ -45,7 +45,7 @@ class Genetico {
         Random rand = new Random();
         local = new LocalSearch();
         int h1[], h2[];
-        int anteriorMejor = 9999999;
+        int anteriorMejor = 9999999, generacion = 0;
         generarPoblacion(x, y, tamPoblacion, cubreOrdenado, matriz);
         for (int i = 1; i < tamPoblacion; i++) {
             modificado[i] = false;
@@ -90,13 +90,14 @@ class Genetico {
                     modificado[i] = true;
                 }
                 if (modificado[i]) {
-                    reparaSol(x, y, matriz, descendencia.get(i));
-                    local.eliminaRedundancias(x, y, matriz, descendencia.get(i), cubreOrdenado, 0);
+                    local.reparaSol(x, y, matriz, descendencia.get(i));
+                    local.eliminaRedundancias(x, y, descendencia.get(i), cubreOrdenado, matriz);
                     costesAux[i] = calculaSolucion(y, descendencia.get(i), matriz);
                     ++z;
                     if (z % 1000 == 0) {
                         probGen -= 0.01;
                     }
+                    modificado[i] = false;
                 }
             }
 
@@ -122,7 +123,6 @@ class Genetico {
             }
 
             //AQUI INTERCAMBIO LAS POBLACIONES
-            //poblacion.clear();
             for (int i = 0; i < descendencia.size(); ++i) {
                 poblacion.set(i, descendencia.get(i).clone());
             }
@@ -148,6 +148,12 @@ class Genetico {
                 generarPoblacion(x, y, tamPoblacion - 1, cubreOrdenado, matriz);
                 poblacion.add(mejor);
                 costes[tamPoblacion - 1] = aux;
+            }
+            ++generacion;
+            if (generacion % 10 == 0) {
+                for (int i = 0; i < tamPoblacion; ++i) {
+                    z += local.busquedaLocal(poblacion.get(i), costes, matriz, x, y, z, i, cubreOrdenado);
+                }
             }
         }
         time_end = System.currentTimeMillis();
@@ -240,58 +246,6 @@ class Genetico {
         return false;
     }
 
-
-    /**
-     * Repara un cromosoma para que sea solucion
-     *
-     * @param x numero de filas de la matriz (zonas)
-     * @param y numero de columnas de la matriz (comisarias)
-     * @param matriz datos de las comisarías y las zonas que cubren asi como su coste
-     * @param sol vector solucion que se esta reparando
-     */
-    private void reparaSol(int x, int y, int matriz[][], int sol[]) {
-        while (true) {
-            int cubiertos[] = new int[x];
-            for (int i = 1; i < x; i++) {
-                cubiertos[i] = 0;
-            }
-            for (int c = 1; c < y; c++) {
-                if (sol[c] == 1) {
-                    for (int f = 1; f < x; f++) {
-                        if (matriz[f][c] == 1) {
-                            cubiertos[f] = 1;
-                        }
-                    }
-                }
-            }
-            int cubre[] = new int[y];
-            for (int i = 0; i < y; i++) {
-                cubre[i] = 0;
-            }
-            for (int f = 1; f < x; f++) {
-                if (cubiertos[f] == 0) {
-                    for (int c = 1; c < y; c++) {
-                        if (matriz[f][c] == 1) {
-                            ++cubre[c];
-                        }
-                    }
-                }
-            }
-            float mayor = (float) cubre[1] / matriz[0][1];
-            int pos = 1;
-            for (int i = 2; i < y; i++) {
-                if (((float) cubre[i] / matriz[0][i]) > mayor) {
-                    mayor = (float) cubre[i] / matriz[0][i];
-                    pos = i;
-                }
-            }
-            if (mayor == 0) {
-                return;
-            }
-            sol[pos] = 1;
-        }
-    }
-
     /**
      * Muta un cromosoma generando uno nuevo
      *
@@ -373,7 +327,7 @@ class Genetico {
             ++cromo[n];
             coste += matriz[0][n];
         } while (!esSolucion(x, y, matriz, cromo));
-        local.eliminaRedundancias(x, y, matriz, cromo, cubreOrdenado, 0);
+        local.eliminaRedundancias(x, y, cromo, cubreOrdenado, matriz);
 
         costes[num] = coste;
         return cromo;
