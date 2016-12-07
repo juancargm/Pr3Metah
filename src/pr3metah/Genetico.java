@@ -11,7 +11,7 @@ import java.util.Random;
 /**
  *
  * @author Juanca
- *
+ * Cosas pendientes: COMPROBAR SI ES LA LOCAL DE LA TABU O LA NORMAL LA QUE HAY QUE USAR
  *
  *
  */
@@ -36,7 +36,7 @@ class Genetico {
      * @param optimo coste optimo del fichero que se está evaluando
      * @param alg algoritmo que se esta evaluando
      */
-    void AGGHux(int x, int y, int matriz[][], Pair cubreOrdenado[], String optimo, String alg) {
+    void AGGHux(int x, int y, int matriz[][], Pair cubreOrdenado[], String optimo, String alg, int modo) {
         long time_start, time_end;
         time_start = System.currentTimeMillis();
         poblacion = new ArrayList<>();
@@ -140,6 +140,18 @@ class Genetico {
                 nGeneracion = 0;
                 anteriorMejor = mejorD;
             }
+            switch (modo) {
+                case 0:
+                    ++generacion;
+                    if (generacion % 10 == 0) {
+                        for (int i = 0; i < tamPoblacion; ++i) {
+                            z += local.busquedaLocal(poblacion, costes, matriz, x, y, z, i, cubreOrdenado);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
             if (reinicializarEstanc() || reinicializarConv()) {
                 int mejor[] = poblacion.get(mejorP).clone();
                 int aux = costes[mejorP];
@@ -148,12 +160,6 @@ class Genetico {
                 generarPoblacion(x, y, tamPoblacion - 1, cubreOrdenado, matriz);
                 poblacion.add(mejor);
                 costes[tamPoblacion - 1] = aux;
-            }
-            ++generacion;
-            if (generacion % 10 == 0) {
-                for (int i = 0; i < tamPoblacion; ++i) {
-                    z += local.busquedaLocal(poblacion.get(i), costes, matriz, x, y, z, i, cubreOrdenado);
-                }
             }
         }
         time_end = System.currentTimeMillis();
@@ -237,7 +243,7 @@ class Genetico {
             }
         }
 
-        float porc = (float) (tamPoblacion * 0.8);
+        float porc = (float) (tamPoblacion * 0.95);
         for (int i = 0; i < tamReinicio; i++) {
             if (reinicializacion[i].getCubre() >= porc) {
                 return true;

@@ -26,9 +26,9 @@ class LocalSearch {
      * @param pair vector de Pair para eliminar la s redundancias
      * @return Devuelve una solución vecina
      */
-    int busquedaLocal(int solucion[], int costes[], int matriz[][], int x, int y, int z, int num, Pair pair[]) {
+    int busquedaLocal(ArrayList<int[]> solucion, int costes[], int matriz[][], int x, int y, int z, int num, Pair pair[]) {
         int anterior, costeVecina, costeActual, posicion;
-        int solucionActual[] = solucion;
+        int solucionActual[] = solucion.get(num);
         costeActual = costes[num];
         numIteraciones = 0;
         Random aleatorio = new Random();
@@ -45,6 +45,7 @@ class LocalSearch {
             anterior = costeActual;
             if (costeVecina < costeActual) {
                 solucionActual = solucionVecina.clone();
+                solucion.set(num, solucionActual.clone());
                 costeActual = costeVecina;
             }
         } while (costeVecina < anterior && numIteraciones < 200);
