@@ -26,7 +26,7 @@ class LocalSearch {
      * @param pair vector de Pair para eliminar la s redundancias
      * @return Devuelve una solución vecina
      */
-    int busquedaLocal(ArrayList<int[]> solucion, int costes[], int matriz[][], int x, int y, int z, int num, Pair pair[]) {
+    int busquedaLocal(ArrayList<int[]> solucion, int costes[], int matriz[][], int x, int y, int num, Pair pair[]) {
         int anterior, costeVecina, costeActual, posicion;
         int solucionActual[] = solucion.get(num);
         costeActual = costes[num];

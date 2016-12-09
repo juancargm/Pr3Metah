@@ -121,7 +121,7 @@ public class Pr3Metah {
             leerFichero(ficheros[i]);
             inicializo();
             gen = new Genetico();
-            gen.AGGHux(x, y, matriz, cubreOrdenado, optimos[i], algoritmo[1], 0);
+            gen.AGGHux(x, y, matriz, cubreOrdenado, optimos[i], algoritmo[1], 3);
             System.out.println();
         }
         time_end = System.currentTimeMillis();

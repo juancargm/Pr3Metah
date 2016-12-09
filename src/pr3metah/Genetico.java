@@ -11,7 +11,7 @@ import java.util.Random;
 /**
  *
  * @author Juanca
- * Cosas pendientes: COMPROBAR SI ES LA LOCAL DE LA TABU O LA NORMAL LA QUE HAY QUE USAR
+ * Cosas pendientes: COMO HACER LO DE LOS 200 vecinos distintos
  *
  *
  */
@@ -45,7 +45,7 @@ class Genetico {
         Random rand = new Random();
         local = new LocalSearch();
         int h1[], h2[];
-        int anteriorMejor = 9999999, generacion = 0;
+        int anteriorMejor = 9999999, generacion = 0, restantes;
         generarPoblacion(x, y, tamPoblacion, cubreOrdenado, matriz);
         for (int i = 1; i < tamPoblacion; i++) {
             modificado[i] = false;
@@ -53,7 +53,7 @@ class Genetico {
 
         //Se generan los descendientes
         int z = 0;
-        int esperanza = (int) Math.round(0.7 * (tamPoblacion / 2)), restantes;
+        int esperanza = (int) Math.round(0.7 * (tamPoblacion / 2)), mejores = (int) Math.round(0.5 * tamPoblacion);
         while (z < 20000) {
             descendencia = new ArrayList<>();
             costesAux = new int[tamPoblacion];
@@ -140,17 +140,41 @@ class Genetico {
                 nGeneracion = 0;
                 anteriorMejor = mejorD;
             }
-            switch (modo) {
-                case 0:
-                    ++generacion;
-                    if (generacion % 10 == 0) {
+            ++generacion;
+            if (generacion % 10 == 0) {
+                switch (modo) {
+                    case 0:
                         for (int i = 0; i < tamPoblacion; ++i) {
-                            z += local.busquedaLocal(poblacion, costes, matriz, x, y, z, i, cubreOrdenado);
+                            z += local.busquedaLocal(poblacion, costes, matriz, x, y, i, cubreOrdenado);
                         }
-                    }
-                    break;
-                default:
-                    break;
+                        break;
+                    case 1:
+                        for (int i = 0; i < tamPoblacion; ++i) {
+                            if (rand.nextDouble() <= 0.1) {
+                                z += local.busquedaLocal(poblacion, costes, matriz, x, y, i, cubreOrdenado);
+                            }
+                        }
+                        break;
+                    case 2:
+                        //Ordeno la poblacion de menor a mayor coste
+                        QuickSort ordena = new QuickSort();
+                        ordena.sort(costes, poblacion);
+                        for (int i = 0; i < mejores; ++i) {
+                            z += local.busquedaLocal(poblacion, costes, matriz, x, y, i, cubreOrdenado);
+                        }
+                        break;
+                    case 3:
+                        //Ordeno la poblacion de menor a mayor coste
+                        QuickSort ordenaP = new QuickSort();
+                        ordenaP.sort(costes, poblacion);
+                        //BL a los 0.1 * N peores cromosomas
+                        for (int i = tamPoblacion - 1; i > tamPoblacion - mejores; --i) {
+                            z += local.busquedaLocal(poblacion, costes, matriz, x, y, i, cubreOrdenado);
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
             if (reinicializarEstanc() || reinicializarConv()) {
                 int mejor[] = poblacion.get(mejorP).clone();
