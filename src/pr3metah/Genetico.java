@@ -52,7 +52,7 @@ class Genetico {
         }
 
         //Se generan los descendientes
-        int z = 0;
+        int z = tamPoblacion;
         int esperanza = (int) Math.round(0.7 * (tamPoblacion / 2)), mejores = (int) Math.round(0.5 * tamPoblacion);
         while (z < 20000) {
             descendencia = new ArrayList<>();
@@ -184,6 +184,7 @@ class Genetico {
                 generarPoblacion(x, y, tamPoblacion - 1, cubreOrdenado, matriz);
                 poblacion.add(mejor);
                 costes[tamPoblacion - 1] = aux;
+                z += tamPoblacion - 1;
             }
         }
         time_end = System.currentTimeMillis();
