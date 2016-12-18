@@ -36,7 +36,7 @@ class Genetico {
      * @param optimo coste optimo del fichero que se está evaluando
      * @param alg algoritmo que se esta evaluando
      */
-    void AGGHux(int x, int y, int matriz[][], Pair cubreOrdenado[], String optimo, String alg, int modo) {
+    void AGGHux(int x, int y, int matriz[][], Pair cubreOrdenado[], String optimo, String alg, String mejora, int modo) {
         long time_start, time_end;
         time_start = System.currentTimeMillis();
         poblacion = new ArrayList<>();
@@ -53,7 +53,7 @@ class Genetico {
 
         //Se generan los descendientes
         int z = tamPoblacion;
-        int esperanza = (int) Math.round(0.7 * (tamPoblacion / 2)), mejores = (int) Math.round(0.5 * tamPoblacion);
+        int esperanza = (int) Math.round(0.7 * (tamPoblacion / 2)), mejores = (int) Math.round(0.1 * tamPoblacion);
         while (z < 20000) {
             descendencia = new ArrayList<>();
             costesAux = new int[tamPoblacion];
@@ -163,15 +163,6 @@ class Genetico {
                             z += local.busquedaLocal(poblacion, costes, matriz, x, y, i, cubreOrdenado);
                         }
                         break;
-                    case 3:
-                        //Ordeno la poblacion de menor a mayor coste
-                        QuickSort ordenaP = new QuickSort();
-                        ordenaP.sort(costes, poblacion);
-                        //BL a los 0.1 * N peores cromosomas
-                        for (int i = tamPoblacion - 1; i > tamPoblacion - mejores; --i) {
-                            z += local.busquedaLocal(poblacion, costes, matriz, x, y, i, cubreOrdenado);
-                        }
-                        break;
                     default:
                         break;
                 }
@@ -195,7 +186,7 @@ class Genetico {
                 mejor = costes[i];
             }
         }
-        System.out.println("ALGORITMO: : " + alg);
+        System.out.println("ALGORITMO: : " + alg + mejora);
         System.out.println("FIN DEL ALGORITMO, EL MEJOR COSTE ES DE: " + mejor + " EL OPTIMO ERA: " + optimo + " SE HAN HECHO " + z + " ITERACCIONES");
         System.out.println("HA TARDADO " + (float) (time_end - time_start) / 1000.0 + " SEGUNDOS");
     }

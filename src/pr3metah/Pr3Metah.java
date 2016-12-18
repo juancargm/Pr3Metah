@@ -118,11 +118,19 @@ public class Pr3Metah {
         long time_start, time_end;
         time_start = System.currentTimeMillis();
         for (int i = 0; i < n; i++) {
-            leerFichero(ficheros[i]);
-            inicializo();
-            gen = new Genetico();
-            gen.AGGHux(x, y, matriz, cubreOrdenado, optimos[i], algoritmo[1], 3);
-            System.out.println();
+            for (int j = 0; j < 5; ++j) {
+                leerFichero(ficheros[i]);
+                inicializo();
+                gen = new Genetico();
+                gen.AGGHux(x, y, matriz, cubreOrdenado, optimos[i], algoritmo[1], " BL EN TODOS", 0);
+                System.out.println();
+                gen = new Genetico();
+                gen.AGGHux(x, y, matriz, cubreOrdenado, optimos[i], algoritmo[1], " BL CON PROB 0.1", 0);
+                System.out.println();
+                gen = new Genetico();
+                gen.AGGHux(x, y, matriz, cubreOrdenado, optimos[i], algoritmo[1], " BL EN LOS 0.1 N MEJORES", 0);
+                System.out.println();
+            }
         }
         time_end = System.currentTimeMillis();
         System.out.println("EL PROGRAMA HA TARDADO " + (float) (time_end - time_start) / 1000.0 + " SEGUNDOS");

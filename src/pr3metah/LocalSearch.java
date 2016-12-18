@@ -66,15 +66,13 @@ class LocalSearch {
      */
     private int generaVecino(int solucionActual[], int matriz[][], int x, int y, int pos, Pair pair[]) {
 
-        int costeVecina;
         solucionVecina = solucionActual;
         ++numIteraciones;
         solucionVecina[pos] = 0;
 
         reparaSol(x, y, matriz, solucionVecina);
         eliminaRedundancias(x, y, solucionVecina, pair, matriz);
-        costeVecina = objetivo(solucionActual, y, matriz);
-        return costeVecina;
+        return objetivo(solucionActual, y, matriz);
     }
 
     /**
@@ -167,20 +165,6 @@ class LocalSearch {
         }
     }
 
-    /**
-     * @param solucionVecina vector solucion
-     * @param tam el tamaño del vector solucion
-     * @return Devuelve el número de conjuntos que tiene una solucion
-     */
-    public static int calculaIteraciones(int solucionVecina[], int tam) {
-        int cont = 0;
-        for (int i = 1; i < tam; ++i) {
-            if (solucionVecina[i] == 1) {
-                ++cont;
-            }
-        }
-        return cont;
-    }
 
     /**
      * Calcula el coste de un vector solucion
@@ -195,13 +179,6 @@ class LocalSearch {
             suma += solucionVecina[i] * matriz[0][i];
         }
         return suma;
-    }
-
-    /**
-     * @return Devuelve el número de iteraciones dadas
-     */
-    public int getIteraciones() {
-        return numIteraciones;
     }
 
     /**
